@@ -1,6 +1,7 @@
 # Keras Tutorial
 
 * **교재** : 블록과 함께하는 파이썬 딥러닝 케라스 (김태영 저)
+* https://tykimos.github.io/lecture/
 
 <br>
 
