@@ -122,3 +122,137 @@ model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accur
 
 ## 6. 모델 학습시키기
 
+케라스에서는 모델을 학습시킬 때 주로 fit() 함수를 사용하지만 제너레이터로 생성된 배치로 학습시킬 경우에는 **fit_generator()** 함수를 사용한다.
+
+```python
+model.fit_generator(
+  train_generator,
+  steps_per_epoch=15,
+  epochs=50,
+  validation_data=test_generator,
+  validation_steps=5)
+```
+
+* **첫 번째 인자** : 훈련 데이터셋을 제공할 제너레이터를 지정
+* **steps_per_epoch** : 한 epoch에 사용할 스텝 수를 지정
+* **epochs** : 전체 훈련 데이터셋에 대해 학습 반복 횟수를 지정
+* **validation_data** : 검증 데이터셋을 제공할 제너레이터를 지정
+* **validation_steps** : 한 epoch 종료 시마다 검증할 때 사용되는 검증 스탭 수를 지정
+
+<br>
+
+## 7. 모델 평가하기
+
+제너레이터에서 제공되는 샘플로 평가할 때는 **evaluate_generator** 함수를 사용한다.
+
+```python
+scores = model.evaluate_generator(test_generator, steps=5)
+print('%s: %.2f%%' %(model.metrics_names[1], scores[1] * 100))
+```
+
+<br>
+
+## 8. 모델 사용하기
+
+모델 사용 시에 제너레이터에서 제공되는 샘플을 입력할 때는 **predict_generator** 함수를 사용한다. 예측 결과는 클래스별 확률 벡터로 출력된다. 제너레이터의 'class_indices'를 출력하면 해당 열의 클래스명을 알 수 있다.
+
+```python
+output = model.predict_generator(test_generator, step=5)
+np.set_printoptions(formatter={'float': lambda x: '{0:0.3f}' .format(x)})
+```
+
+<br>
+
+## 9. 전체 소스
+
+```python
+# 0. 사용할 패키지 불러오기
+import numpy as np
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Flatten
+from keras.layers.convolutional import Conv2D
+from keras.layers.convolutional import MaxPooling2D
+from keras.preprocessing.image import ImageDataGenerator
+
+# 랜덤시드 고정시키기
+np.random.seed(3)
+
+# 1. 데이터 생성하기
+train_datagen = ImageDataGenerator(rescale=1./255)
+
+train_generator = train_datagen.flow_from_directory(
+    '/content/drive/My Drive/Colab Notebooks/handwriting_shape/train',
+    target_size=(24, 24),
+    batch_size=3,
+    class_mode='categorical')
+
+test_datagen = ImageDataGenerator(rescale=1./255)
+
+test_generator = test_datagen.flow_from_directory(
+    '/content/drive/My Drive/Colab Notebooks/handwriting_shape/test',
+    target_size=(24, 24),
+    batch_size=3,
+    class_mode='categorical')
+
+# 2. 모델 구성하기
+model = Sequential()
+model.add(Conv2D(32, kernel_size=(3, 3),
+                 activation='relu',
+                 input_shape=(24, 24, 3)))
+model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Flatten())
+model.add(Dense(128, activation='relu'))
+model.add(Dense(3, activation='softmax'))
+
+# 3. 모델 학습과정 설정하기
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+# 4. 모델 학습시키기
+model.fit_generator(
+    train_generator,
+    steps_per_epoch=15,
+    epochs=50,
+    validation_data=test_generator,
+    validation_steps=5)
+
+# 6. 모델 평가하기
+print('-- Evaluate --')
+scores = model.evaluate_generator(test_generator, steps=5)
+print('%s: %.2f%%' %(model.metrics_names[1], scores[1] * 100))
+
+# 7. 모델 사용하기
+print('-- Predict --')
+output = model.predict_generator(test_generator, steps=5)
+np.set_printoptions(formatter={'float': lambda x: '{0:0.3f}' .format(x)})
+print(test_generator.class_indices)
+print(output)
+```
+
+**실행 결과**
+
+```
+# 6
+-- Evaluate --
+accuracy: 100.00%
+
+# 7
+-- Predict --
+{'circle': 0, 'rectangle': 1, 'triangle': 2}
+[[0.000 0.000 1.000]
+ [0.996 0.000 0.004]
+ [0.000 0.000 1.000]
+ [1.000 0.000 0.000]
+ [0.000 1.000 0.000]
+ [1.000 0.000 0.000]
+ [0.000 1.000 0.000]
+ [0.000 1.000 0.000]
+ [0.000 0.003 0.997]
+ [0.069 0.798 0.133]
+ [0.000 0.001 0.999]
+ [1.000 0.000 0.000]
+ [1.000 0.000 0.000]
+ [0.000 0.000 1.000]
+ [0.000 1.000 0.000]]
+```
