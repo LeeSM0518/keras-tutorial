@@ -343,3 +343,24 @@ Epoch 50/50
 100/100 [==============================] - 0s 214us/step
 loss : 0.008553402405232191
 ```
+
+<br>
+
+### 학습결과 비교
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">퍼셉트론 신경망 모델</th>
+      <th style="text-align: center">다층퍼셉트론 신경망 모델</th>
+      <th style="text-align: center">깊은 다층퍼셉트론 신경망 모델</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><img src="http://tykimos.github.io/warehouse/2017-8-12-Numerical_Prediction_Model_Recipe_6.png" alt="img"></td>
+      <td style="text-align: center"><img src="http://tykimos.github.io/warehouse/2017-8-12-Numerical_Prediction_Model_Recipe_7.png" alt="img"></td>
+      <td style="text-align: center"><img src="http://tykimos.github.io/warehouse/2017-8-12-Numerical_Prediction_Model_Recipe_8.png" alt="img"></td>
+    </tr>
+  </tbody>
+</table>
