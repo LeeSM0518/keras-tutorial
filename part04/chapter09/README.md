@@ -133,6 +133,381 @@ model.add(Dense(46, activation='softmax'))
 ### 다층퍼셉트론 신경망 모델
 
 ```python
+# 0. 사용할 패키지 불러오기
+from keras.datasets import reuters
+from keras.utils import np_utils
+from keras.preprocessing import sequence
+from keras.models import Sequential
+from keras.layers import Dense, Embedding, Flatten
 
+max_features = 15000
+text_max_words = 120
+
+# 1. 데이터셋 생성하기
+
+# 훈련셋과 시험셋 불러오기
+(x_train, y_train), (x_test, y_test) = reuters.load_data(num_words=max_features)
+
+# 훈련셋과 검증셋 분리
+x_val = x_train[7000:]
+y_val = y_train[7000:]
+x_train = x_train[:7000]
+y_train = y_train[:7000]
+
+# 데이터셋 전처리 : 문장 길이 맞추기
+x_train = sequence.pad_sequences(x_train, maxlen=text_max_words)
+x_val = sequence.pad_sequences(x_val, maxlen=text_max_words)
+x_test = sequence.pad_sequences(x_test, maxlen=text_max_words)
+
+# one-hot 인코딩
+y_train = np_utils.to_categorical(y_train)
+y_val = np_utils.to_categorical(y_val)
+y_test = np_utils.to_categorical(y_test)
+
+# 2. 모델 구성하기
+model = Sequential()
+model.add(Embedding(max_features, 128, input_length=text_max_words))
+model.add(Flatten())
+model.add(Dense(256, activation='relu'))
+model.add(Dense(46, activation='softmax'))
+
+# 3. 모델 학습과정 설정하기
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+# 4. 모델 학습시키기
+hist = model.fit(x_train, y_train, epochs=10, batch_size=64, validation_data=(x_val, y_val))
+
+# 5. 학습과정 살펴보기
+%matplotlib inline
+import matplotlib.pyplot as plt
+
+fig, loss_ax = plt.subplots()
+
+acc_ax = loss_ax.twinx()
+
+loss_ax.plot(hist.history['loss'], 'y', label='train loss')
+loss_ax.plot(hist.history['val_loss'], 'r', label='val loss')
+loss_ax.set_ylim([0.0, 3.0])
+
+acc_ax.plot(hist.history['accuracy'], 'b', label='train acc')
+acc_ax.plot(hist.history['val_accuracy'], 'g', label='val acc')
+acc_ax.set_ylim([0.0, 1.0])
+
+loss_ax.set_xlabel('epoch')
+loss_ax.set_ylabel('loss')
+acc_ax.set_ylabel('accuracy')
+
+loss_ax.legend(loc='upper left')
+acc_ax.legend(loc='lower left')
+
+plt.show()
+
+# 6. 모델 평가하기
+loss_and_metrics = model.evaluate(x_test, y_test, batch_size=64)
+print('## evaluation loss and metrics ##')
+print(loss_and_metrics)
 ```
 
+![image](https://user-images.githubusercontent.com/43431081/81930971-4c38c780-9624-11ea-8163-b07ef343cfd4.png)
+
+```
+2246/2246 [==============================] - 0s 196us/step
+## evaluation loss and metrics ##
+[1.4612263896480162, 0.687889575958252]
+```
+
+<br>
+
+### 순환 신경망 모델
+
+```python
+# 0. 사용할 패키지 불러오기
+from keras.datasets import reuters
+from keras.utils import np_utils
+from keras.preprocessing import sequence
+from keras.models import Sequential
+from keras.layers import Dense, Embedding, LSTM, Flatten
+
+max_features = 15000
+text_max_words = 120
+
+# 1. 데이터셋 생성하기
+
+# 훈련셋과 시험셋 불러오기
+(x_train, y_train), (x_test, y_test) = reuters.load_data(num_words=max_features)
+
+# 훈련셋과 검증셋 분리
+x_val = x_train[7000:]
+y_val = y_train[7000:]
+x_train = x_train[:7000]
+y_train = y_train[:7000]
+
+# 데이터셋 전처리 : 문장 길이 맞추기
+x_train = sequence.pad_sequences(x_train, maxlen=text_max_words)
+x_val = sequence.pad_sequences(x_val, maxlen=text_max_words)
+x_test = sequence.pad_sequences(x_test, maxlen=text_max_words)
+
+# one-hot 인코딩
+y_train = np_utils.to_categorical(y_train)
+y_val = np_utils.to_categorical(y_val)
+y_test = np_utils.to_categorical(y_test)
+
+# 2. 모델 구성하기
+model = Sequential()
+model.add(Embedding(max_features, 128))
+model.add(LSTM(128))
+model.add(Dense(46, activation='softmax'))
+
+# 3. 모델 학습과정 설정하기
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+# 4. 모델 학습시키기
+hist = model.fit(x_train, y_train, epochs=10, batch_size=64, validation_data=(x_val, y_val))
+
+## 5. 학습과정 살펴보기
+%matplotlib inline
+import matplotlib.pyplot as plt
+
+fig, loss_ax = plt.subplots()
+
+acc_ax = loss_ax.twinx()
+
+loss_ax.plot(hist.history['loss'], 'y', label='train loss')
+loss_ax.plot(hist.history['val_loss'], 'r', label='val loss')
+loss_ax.set_ylim([0.0, 3.0])
+
+acc_ax.plot(hist.history['accuracy'], 'b', label='train acc')
+acc_ax.plot(hist.history['val_accuracy'], 'g', label='val acc')
+acc_ax.set_ylim([0.0, 1.0])
+
+loss_ax.set_xlabel('epoch')
+loss_ax.set_ylabel('loss')
+acc_ax.set_ylabel('accuracy')
+
+loss_ax.legend(loc='upper left')
+acc_ax.legend(loc='lower left')
+
+plt.show()
+
+# 6. 모델 평가하기
+loss_and_metrics = model.evaluate(x_test, y_test, batch_size=64)
+print('## evaluation loss and metrics ##')
+print(loss_and_metrics)
+```
+
+![image](https://user-images.githubusercontent.com/43431081/81933287-172e7400-9628-11ea-863b-7f79eb60603f.png)
+
+```
+2246/2246 [==============================] - 3s 1ms/step
+## evaluation loss and metrics ##
+[1.6154488617038472, 0.6665182709693909]
+```
+
+<br>
+
+### 컨볼루션 신경망 모델
+
+```python
+# 0. 사용할 패키지 불러오기
+from keras.datasets import reuters
+from keras.utils import np_utils
+from keras.preprocessing import sequence
+from keras.models import Sequential
+from keras.layers import Dense, Embedding, LSTM
+from keras.layers import Flatten, Dropout
+from keras.layers import Conv1D, GlobalMaxPooling1D
+
+max_features = 15000
+text_max_words = 120
+
+# 1. 데이터셋 생성하기
+
+# 훈련셋과 시험셋 불러오기
+(x_train, y_train), (x_test, y_test) = reuters.load_data(num_words=max_features)
+
+# 훈련셋과 검증셋 분리
+x_val = x_train[7000:]
+y_val = y_train[7000:]
+x_train = x_train[:7000]
+y_train = y_train[:7000]
+
+# 데이터셋 전처리 : 문장 길이 맞추기
+x_train = sequence.pad_sequences(x_train, maxlen=text_max_words)
+x_val = sequence.pad_sequences(x_val, maxlen=text_max_words)
+x_test = sequence.pad_sequences(x_test, maxlen=text_max_words)
+
+# one-hot 인코딩
+y_train = np_utils.to_categorical(y_train)
+y_val = np_utils.to_categorical(y_val)
+y_test = np_utils.to_categorical(y_test)
+
+# 2. 모델 구성하기
+model = Sequential()
+model.add(Embedding(max_features, 128, input_length=text_max_words))
+model.add(Dropout(0.2))
+model.add(Conv1D(256, 3, padding='valid', activation='relu', strides=1))
+model.add(GlobalMaxPooling1D())
+model.add(Dense(128, activation='relu'))
+model.add(Dropout(0.2))
+model.add(Dense(46, activation='softmax'))
+
+# 3. 모델 학습과정 설정하기
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+# 4. 모델 학습시키기
+hist = model.fit(x_train, y_train, epochs=10, batch_size=64, validation_data=(x_val, y_val))
+
+# 5. 학습과정 살펴보기
+%matplotlib inline
+import matplotlib.pyplot as plt
+
+fig, loss_ax = plt.subplots()
+
+acc_ax = loss_ax.twinx()
+
+loss_ax.plot(hist.history['loss'], 'y', label='train loss')
+loss_ax.plot(hist.history['val_loss'], 'r', label='val loss')
+loss_ax.set_ylim([0.0, 3.0])
+
+acc_ax.plot(hist.history['accuracy'], 'b', label='train acc')
+acc_ax.plot(hist.history['val_accuracy'], 'g', label='val acc')
+acc_ax.set_ylim([0.0, 1.0])
+
+loss_ax.set_xlabel('epoch')
+loss_ax.set_ylabel('loss')
+acc_ax.set_ylabel('accuracy')
+
+loss_ax.legend(loc='upper left')
+acc_ax.legend(loc='lower left')
+
+plt.show()
+
+# 6. 모델 평가하기
+loss_and_metrics = model.evaluate(x_test, y_test, batch_size=64)
+print('## evaluation loss and metrics ##')
+print(loss_and_metrics)
+```
+
+![image](https://user-images.githubusercontent.com/43431081/81933379-3cbb7d80-9628-11ea-8bfd-43bc365bb812.png)
+
+```
+2246/2246 [==============================] - 1s 455us/step
+## evaluation loss and metrics ##
+[1.2994123129364856, 0.7617987394332886]
+```
+
+<br>
+
+### 순환 컨볼루션 신경망 모델
+
+```python
+# 0. 사용할 패키지 불러오기
+from keras.datasets import reuters
+from keras.utils import np_utils
+from keras.preprocessing import sequence
+from keras.models import Sequential
+from keras.layers import Dense, Embedding, LSTM, \
+                         Flatten, Dropout, \
+                         Conv1D, MaxPooling1D
+
+max_features = 15000
+text_max_words = 120
+
+# 1. 데이터셋 생성하기
+
+# 훈련셋과 시험셋 불러오기
+(x_train, y_train), (x_test, y_test) = reuters.load_data(num_words=max_features)
+
+# 훈련셋과 검증셋 분리
+x_val = x_train[7000:]
+y_val = y_train[7000:]
+x_train = x_train[:7000]
+y_train = y_train[:7000]
+
+# 데이터셋 전처리 : 문장 길이 맞추기
+x_train = sequence.pad_sequences(x_train, maxlen=text_max_words)
+x_val = sequence.pad_sequences(x_val, maxlen=text_max_words)
+x_test = sequence.pad_sequences(x_test, maxlen=text_max_words)
+
+# one-hot 인코딩
+y_train = np_utils.to_categorical(y_train)
+y_val = np_utils.to_categorical(y_val)
+y_test = np_utils.to_categorical(y_test)
+
+# 2. 모델 구성하기
+model = Sequential()
+model.add(Embedding(max_features, 128, input_length=text_max_words))
+model.add(Dropout(0.2))
+model.add(Conv1D(256, 3, padding='valid', activation='relu', strides=1))
+model.add(MaxPooling1D(pool_size=4))
+model.add(LSTM(128))
+model.add(Dense(46, activation='softmax'))
+
+# 3. 모델 학습과정 설정하기
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+# 4. 모델 학습시키기
+hist = model.fit(x_train, y_train, epochs=10, batch_size=64, validation_data=(x_val, y_val))
+
+# 5. 학습과정 살펴보기
+%matplotlib inline
+import matplotlib.pyplot as plt
+
+fig, loss_ax = plt.subplots()
+acc_ax = loss_ax.twinx()
+
+loss_ax.plot(hist.history['loss'], 'y', label='train loss')
+loss_ax.plot(hist.history['val_loss'], 'r', label='val loss')
+loss_ax.set_ylim([0.0, 3.0])
+
+acc_ax.plot(hist.history['accuracy'], 'b', label='train acc')
+acc_ax.plot(hist.history['val_accuracy'], 'g', label='val acc')
+acc_ax.set_ylim([0.0, 1.0])
+
+loss_ax.set_xlabel('epoch')
+loss_ax.set_ylabel('loss')
+acc_ax.set_ylabel('accuracy')
+
+loss_ax.legend(loc='upper left')
+acc_ax.legend(loc='lower left')
+
+plt.show()
+
+# 6. 모델 평가하기
+loss_and_metrics = model.evaluate(x_test, y_test, batch_size=64)
+print('## evaluation loss and metrics ##')
+print(loss_and_metrics)
+```
+
+![image](https://user-images.githubusercontent.com/43431081/81934626-3b8b5000-962a-11ea-866f-d10a5d3fb338.png)
+
+```
+2246/2246 [==============================] - 2s 904us/step
+## evaluation loss and metrics ##
+[1.4812380506433978, 0.6874443292617798]
+```
+
+<br>
+
+## 5. 학습결과 비교
+
+단순한 다층퍼셉트론 신경망 모델보다는 순환 레이어나 컨볼루션 레이어를 이용한 모델의 성능이 더 높아졌다.
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">다층퍼셉트론 신경망 모델</th>
+      <th style="text-align: center">순환 신경망 모델</th>
+      <th style="text-align: center">컨볼루션 신경망 모델</th>
+      <th style="text-align: center">순환 컨볼루션 신경망 모델</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><img src="http://tykimos.github.io/warehouse/2017-8-17-Text_Input_Multiclass_Classification_Model_Recipe_output_12_1.png" alt="img"></td>
+      <td style="text-align: center"><img src="http://tykimos.github.io/warehouse/2017-8-17-Text_Input_Multiclass_Classification_Model_Recipe_output_14_1.png" alt="img"></td>
+      <td style="text-align: center"><img src="http://tykimos.github.io/warehouse/2017-8-17-Text_Input_Multiclass_Classification_Model_Recipe_output_16_1.png" alt="img"></td>
+      <td style="text-align: center"><img src="http://tykimos.github.io/warehouse/2017-8-17-Text_Input_Multiclass_Classification_Model_Recipe_output_18_1.png" alt="img"></td>
+    </tr>
+  </tbody>
+</table>
