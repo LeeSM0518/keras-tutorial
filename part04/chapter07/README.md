@@ -166,7 +166,7 @@ for i in range(2):
   model.add(LSTM(32, batch_input_shape=(1, lock_back, 1), stateful=True, 
                  return_sequences=True))
   model.add(Dropout(0.3))
-model.add(LSTM32, batch_input_shape=(1, look_back, 1), stateful=True)
+model.add(LSTM(32, batch_input_shape=(1, look_back, 1), stateful=True))
 model.add(Dropout(0.3))
 model.add(Dense(1))
 ```
