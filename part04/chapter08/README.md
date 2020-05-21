@@ -116,7 +116,7 @@ model.add(Dense(1, activation='sigmoid'))
 
 * **임베딩 레이어의 인자**
   * 첫 번째 인자(input_dim): 단어 사전의 크기를 말하며 총 20,000 개의 단어 종류가 있다는 의미이다.
-  * 두 번째 인자(output_dim): 단어를 인코딩한 후 나오는 벡터 크기이다. 이 값이 128이라면 단어를 128차원의 의미론적 기하공간에 나타낸다는 의미이다.
+  * 두 번째 인자(output_dim): 단어를 인코딩한 후 나오는 벡터 크기이다.
   * input_length: 단어의 수 즉 문자의 길이를 나타낸다.
 
 <br>
@@ -539,3 +539,4 @@ print(loss_and_metrics)
     </tr>
   </tbody>
 </table>
+
