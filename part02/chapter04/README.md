@@ -17,8 +17,7 @@ hist = model.fit(x_train, y_train, epochs=3000, batch_size=10, validation_data=(
 EarlyStopping 콜백함수에서 설정할 수 있는 인자는 다음과 같다.
 
 ```python
-keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=0, verbose=0,
-                             mode='auto')
+keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=0, verbose=0, mode='auto')
 ```
 
 * **monitor** : 관찰하고자 하는 항목이다.
